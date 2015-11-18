@@ -662,7 +662,7 @@ class Mysql {
 	 * @param string|object|array $where
 	 * @return string where 后面的语句,不含where
 	 */
-	private function where($where, $glue = "AND") {
+	public function where($where, $glue = "AND") {
 		if (empty($where)) {
 			return NULL;
 		}
