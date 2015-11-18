@@ -662,7 +662,7 @@ class Mysql {
 	 * @param string|object|array $where
 	 * @return string where 后面的语句,不含where
 	 */
-	public function where($where, $glue = "AND") {
+	public function where($where, $glue = "AND", $ignoreEmptyValue = false) {
 		if (empty($where)) {
 			return NULL;
 		}
@@ -675,6 +675,10 @@ class Mysql {
 		if (is_array($where)) {
 			$pair = array();
 			foreach ($where as $key => $value) {
+				if ($ignoreEmptyValue === true && ($value === null || $value === "")) {
+					continue;
+				}
+
 				$operator = null;
 				$key_len = strlen($key);
 				if ($operator === null && $key_len > 2) {
@@ -715,7 +719,7 @@ class Mysql {
 
 				//
 				if (empty($operator) && (strtoupper($key) === "AND" || strtoupper($key) === "OR") && (is_object($value) || is_array($value))) {
-					$pair[] = "(" . $this -> where($value, strtoupper($key)) . ")";
+					$pair[] = "(" . $this -> where($value, strtoupper($key), $ignoreEmptyValue) . ")";
 					continue;
 				}
 				// 禁止加引号,直接用value的值
