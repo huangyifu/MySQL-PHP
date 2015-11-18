@@ -505,6 +505,17 @@ class Mysql {
 	}
 
 	/**
+	 * 插入记录并返回ID
+	 *
+	 * @param string $tableName
+	 * @param array|object $data
+	 * @return number 成功返回true或者id,失败返回false
+	 */
+	function insertForId($tableName, $data) {
+		return insert($tableName, $data, true);
+	}
+
+	/**
 	 * 插入一条记录
 	 *
 	 * @param string $tableName
@@ -770,7 +781,7 @@ class Mysql {
 				}
 			}
 			if (count($pair) > 0) {
-				return implode(" $glue ", $pair);
+				return implode(" {$glue} ", $pair);
 			} else {
 				return "";
 			}
