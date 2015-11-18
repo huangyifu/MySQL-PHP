@@ -699,17 +699,23 @@ class Mysql {
 					} elseif ($postfix1 == "@") {// IN (XX,YYY)
 						$key = substring($key, 0, -1);
 						$operator = "IN";
-					} else {
-						$operator = "=";
 					}
+				}
+
+				//
+				if (empty($operator) && (strtoupper($key) === "AND" || strtoupper($key) === "OR") && (is_object($value) || is_array($value))) {
+					$pair[] = "(" . $this -> where($value, strtoupper($key)) . ")";
+					continue;
 				}
 				// 禁止加引号,直接用value的值
 				if ($key == "*") {
 					$pair[] = $value;
 					continue;
 				}
-				//
-				if (is_array($value) && array_values($value) === $value) {
+				if (empty($operator)) {
+					$operator = "=";
+				}
+				if (is_array($value) && array_values($value) === $value) {//数字索引数组
 					//					if ($this -> underScore === TRUE) {
 					//						// 变成下划线格式
 					//						$key = $this -> toUnderScoreCase($key);
@@ -730,9 +736,6 @@ class Mysql {
 							$pair[] = $this -> escapeColumnName($key) . " IN ('" . implode("','", $value) . "')";
 						}
 					}
-					continue;
-				} elseif (is_object($value) || is_array($value)) {
-					$pair[] = "(" . $this -> where($value, strtoupper($key)) . ")";
 					continue;
 				} else {
 					//					if ($this -> underScore === TRUE) {
