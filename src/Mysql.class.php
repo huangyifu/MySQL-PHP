@@ -4,7 +4,7 @@
  * 使用之前要定义好一下几个常量
  * MYSQL_HOST;MYSQL_PORT;MYSQL_USER;MYSQL_PASS;MYSQL_DB;
  * 默认的字符集是utf8
- * @author yifu.huang@qq.com
+ * @author huangyifu
  *
  */
 class Mysql {
@@ -149,7 +149,7 @@ class Mysql {
 					if ($this -> resultCase === 'camel') {
 						//把结果集中字段名变成指定的格式
 						if (empty($colNames[$key])) {
-							$colNames[$key] = toCamelCase($key);
+							$colNames[$key] = $this -> toCamelCase($key);
 						}
 						$newArray[$colNames[$key]] = $value;
 					} else {
@@ -400,7 +400,7 @@ class Mysql {
 
 	function get_columns($tableName) {
 		if ($this -> underScore === TRUE) {
-			$tableName = toUnderScoreCase($tableName);
+			$tableName = $this -> toUnderScoreCase($tableName);
 		}
 		if (isset($this -> columnsCache[$tableName])) {
 			return $this -> columnsCache[$tableName];
@@ -423,13 +423,13 @@ class Mysql {
 	 */
 	private function selectSql($tableName, $cols, $where = NULL, $postfix = NULL, $distinct = FALSE) {
 		if ($this -> underScore === TRUE) {
-			$tableName = toUnderScoreCase($tableName);
+			$tableName = $this -> toUnderScoreCase($tableName);
 		}
 		if (is_array($cols)) {
 			$fields = array();
 			foreach ($cols as $index => $name) {
 				if ($this -> underScore === TRUE) {
-					$name = toUnderScoreCase($name);
+					$name = $this -> toUnderScoreCase($name);
 				}
 				$name = $this -> escapeColumnName($name);
 
@@ -437,7 +437,7 @@ class Mysql {
 					$fields[] = $name;
 				} else {
 					if ($this -> underScore === TRUE) {
-						$index = toUnderScoreCase($index);
+						$index = $this -> toUnderScoreCase($index);
 					}
 					$index = $this -> escapeColumnName($index);
 					$fields[] = "{$index} AS {$name}";
@@ -446,7 +446,7 @@ class Mysql {
 			$cols = implode(",", $fields);
 		} else {
 			if ($this -> underScore === TRUE) {
-				$cols = toUnderScoreCase($cols);
+				$cols = $this -> toUnderScoreCase($cols);
 			}
 		}
 
@@ -463,9 +463,9 @@ class Mysql {
 				if ($col === '#') {
 					$LIMIT = " LIMIT " . $sort;
 				} elseif ($newPf === NULL) {
-					$newPf = " ORDER BY " . $this -> escapeColumnName(toUnderScoreCase($col)) . " $sort ";
+					$newPf = " ORDER BY " . $this -> escapeColumnName($this -> toUnderScoreCase($col)) . " $sort ";
 				} else {
-					$newPf .= ", " . $this -> escapeColumnName(toUnderScoreCase($col)) . " $sort ";
+					$newPf .= ", " . $this -> escapeColumnName($this -> toUnderScoreCase($col)) . " $sort ";
 				}
 			}
 			$sql .= " " . $newPf . $LIMIT;
@@ -513,7 +513,7 @@ class Mysql {
 	 */
 	function insert($tableName, $data, $needReturnId = FALSE) {
 		if ($this -> underScore === TRUE) {
-			$tableName = toUnderScoreCase($tableName);
+			$tableName = $this -> toUnderScoreCase($tableName);
 		}
 		$sql = "INSERT INTO " . $this -> escapeColumnName($tableName);
 		if (is_object($data)) {
@@ -528,7 +528,7 @@ class Mysql {
 			}
 			foreach ($data as $key => $value) {
 				if ($this -> underScore === TRUE) {
-					$key = toUnderScoreCase($key);
+					$key = $this -> toUnderScoreCase($key);
 				}
 				if ($this -> validateColumnName === true && array_key_exists($key, $table_columns) === false) {
 					// 忽略
@@ -570,7 +570,7 @@ class Mysql {
 	 */
 	function update($tableName, $data, $where) {
 		if ($this -> underScore === TRUE) {
-			$tableName = toUnderScoreCase($tableName);
+			$tableName = $this -> toUnderScoreCase($tableName);
 		}
 		$sql = "UPDATE " . $this -> escapeColumnName($tableName);
 		if (is_object($data)) {
@@ -584,7 +584,7 @@ class Mysql {
 			$pair = array();
 			foreach ($data as $key => $value) {
 				if ($this -> underScore === TRUE) {
-					$key = toUnderScoreCase($key);
+					$key = $this -> toUnderScoreCase($key);
 				}
 				if ($this -> validateColumnName === true && array_key_exists($key, $table_columns) === false) {
 					// 忽略
@@ -626,7 +626,7 @@ class Mysql {
 	 */
 	function delete($tableName, $where) {
 		if ($this -> underScore === TRUE) {
-			$tableName = toUnderScoreCase($tableName);
+			$tableName = $this -> toUnderScoreCase($tableName);
 		}
 		$sql = "DELETE FROM " . $this -> escapeColumnName($tableName);
 		$w = $this -> where($where);
@@ -710,7 +710,7 @@ class Mysql {
 				if (is_array($value) && array_values($value) === $value) {
 					if ($this -> underScore === TRUE) {
 						// 变成下划线格式
-						$key = toUnderScoreCase($key);
+						$key = $this -> toUnderScoreCase($key);
 					}
 					if (is_int($value[0]) || is_float($value[0])) {
 						if ($operator == "NOT IN" || $operator == "<>") {
@@ -735,7 +735,7 @@ class Mysql {
 				} else {
 					if ($this -> underScore === TRUE) {
 						// 变成下划线格式
-						$key = toUnderScoreCase($key);
+						$key = $this -> toUnderScoreCase($key);
 					}
 					// 把boolean的当作数字看待
 					if ($value === TRUE) {
@@ -789,46 +789,46 @@ class Mysql {
 		return $name;
 	}
 
-}
+	/////////////////////////////////////
+	function toCapitalizeWords($str) {
+		$words = (preg_replace('/((?<=[a-z|0-9])(?=[A-Z]))/', ' ', $str));
+		$words = str_replace("_", " ", $words);
+		return ucwords($words);
+	}
 
-/////////////////////////////////////
-function toCapitalizeWords($str) {
-	$words = (preg_replace('/((?<=[a-z|0-9])(?=[A-Z]))/', ' ', $str));
-	$words = str_replace("_", " ", $words);
-	return ucwords($words);
-}
+	/**
+	 * 转换字符串成下划线格式(小写):
+	 * abcDef=>abc_def
+	 * AbcDef=>abc_def
+	 *
+	 * @param string $str
+	 */
+	function toUnderScoreCase($str) {
+		return strtolower(preg_replace('/((?<=[a-z|0-9])(?=[A-Z]))/', '_', $str));
+	}
 
-/**
- * 转换字符串成下划线格式(小写):
- * abcDef=>abc_def
- * AbcDef=>abc_def
- *
- * @param string $str
- */
-function toUnderScoreCase($str) {
-	return strtolower(preg_replace('/((?<=[a-z|0-9])(?=[A-Z]))/', '_', $str));
-}
+	/**
+	 * 转换字符串成驼峰格式(小写开头):
+	 * abc_def=>abcDef
+	 *
+	 * @param string $str
+	 */
+	function toCamelCase($str) {
+		$ret = toCapitalizeCamelCase($str);
+		return lcfirst($ret);
+	}
 
-/**
- * 转换字符串成驼峰格式(小写开头):
- * abc_def=>abcDef
- *
- * @param string $str
- */
-function toCamelCase($str) {
-	$ret = toCapitalizeCamelCase($str);
-	return lcfirst($ret);
-}
+	/**
+	 * 转换字符串成驼峰格式(大写开头):
+	 * abc_def=>abcDef
+	 *
+	 * @param string $str
+	 */
+	function toCapitalizeCamelCase($str) {
+		$ret = preg_replace("/(?:^|_)([a-z])/e", "strtoupper('\\1')", $str);
+		return str_replace("_", "", $ret);
+	}
 
-/**
- * 转换字符串成驼峰格式(大写开头):
- * abc_def=>abcDef
- *
- * @param string $str
- */
-function toCapitalizeCamelCase($str) {
-	$ret = preg_replace("/(?:^|_)([a-z])/e", "strtoupper('\\1')", $str);
-	return str_replace("_", "", $ret);
 }
 
 // echo substring ( "sdfasdf1*<", - 1 );
