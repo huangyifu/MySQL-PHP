@@ -26,9 +26,9 @@ class Mysql {
 		// set default charset as utf8
 		$this -> charset = 'utf8';
 		// 使用下划线格式作为列名和表名
-		$this -> underScore = TRUE;
-		$this -> resultCase = '';
-		$this -> validateColumnName = false;
+		//		$this -> underScore = false;
+		//		$this -> resultCase = '';
+		$this -> validateColumnName = true;
 	}
 
 	/**
@@ -42,13 +42,13 @@ class Mysql {
 		$this -> charset = $charset;
 	}
 
-	public function setUnderScore($mode = TRUE) {
-		$this -> underScore = $mode;
-	}
+	//	public function setUnderScore($mode = TRUE) {
+	//		$this -> underScore = $mode;
+	//	}
 
-	public function setResultCase($mode = 'camel') {// 'camel'
-		$this -> resultCase = $mode;
-	}
+	//	public function setResultCase($mode = 'camel') {// 'camel'
+	//		$this -> resultCase = $mode;
+	//	}
 
 	public function setValidateColumnName($mode) {
 		$this -> validateColumnName = $mode;
@@ -146,15 +146,15 @@ class Mysql {
 							// 浮点
 						}
 					}
-					if ($this -> resultCase === 'camel') {
-						//把结果集中字段名变成指定的格式
-						if (empty($colNames[$key])) {
-							$colNames[$key] = $this -> toCamelCase($key);
-						}
-						$newArray[$colNames[$key]] = $value;
-					} else {
-						$newArray[$key] = $value;
-					}
+					//					if ($this -> resultCase === 'camel') {
+					//把结果集中字段名变成指定的格式
+					//						if (empty($colNames[$key])) {
+					//							$colNames[$key] = $this -> toCamelCase($key);
+					//						}
+					//						$newArray[$colNames[$key]] = $value;
+					//					} else {
+					$newArray[$key] = $value;
+					//					}
 				}
 				$data[$i++] = $newArray;
 				$row = mysqli_fetch_array($result, MYSQL_ASSOC);
@@ -399,9 +399,9 @@ class Mysql {
 	}
 
 	function get_columns($tableName) {
-		if ($this -> underScore === TRUE) {
-			$tableName = $this -> toUnderScoreCase($tableName);
-		}
+		//		if ($this -> underScore === TRUE) {
+		//			$tableName = $this -> toUnderScoreCase($tableName);
+		//		}
 		if (isset($this -> columnsCache[$tableName])) {
 			return $this -> columnsCache[$tableName];
 		}
@@ -422,32 +422,32 @@ class Mysql {
 	 * 返回生成的SELECT SQL
 	 */
 	private function selectSql($tableName, $cols, $where = NULL, $postfix = NULL, $distinct = FALSE) {
-		if ($this -> underScore === TRUE) {
-			$tableName = $this -> toUnderScoreCase($tableName);
-		}
+		//		if ($this -> underScore === TRUE) {
+		//			$tableName = $this -> toUnderScoreCase($tableName);
+		//		}
 		if (is_array($cols)) {
 			$fields = array();
 			foreach ($cols as $index => $name) {
-				if ($this -> underScore === TRUE) {
-					$name = $this -> toUnderScoreCase($name);
-				}
+				//				if ($this -> underScore === TRUE) {
+				//					$name = $this -> toUnderScoreCase($name);
+				//				}
 				$name = $this -> escapeColumnName($name);
 
 				if (is_int($index)) {
 					$fields[] = $name;
 				} else {
-					if ($this -> underScore === TRUE) {
-						$index = $this -> toUnderScoreCase($index);
-					}
+					//					if ($this -> underScore === TRUE) {
+					//						$index = $this -> toUnderScoreCase($index);
+					//					}
 					$index = $this -> escapeColumnName($index);
 					$fields[] = "{$index} AS {$name}";
 				}
 			}
 			$cols = implode(",", $fields);
 		} else {
-			if ($this -> underScore === TRUE) {
-				$cols = $this -> toUnderScoreCase($cols);
-			}
+			//			if ($this -> underScore === TRUE) {
+			//				$cols = $this -> toUnderScoreCase($cols);
+			//			}
 		}
 
 		$sql = "SELECT " . ($distinct === TRUE ? " DISTINCT " : " ") . " $cols FROM " . $this -> escapeColumnName($tableName);
@@ -463,9 +463,11 @@ class Mysql {
 				if ($col === '#') {
 					$LIMIT = " LIMIT " . $sort;
 				} elseif ($newPf === NULL) {
-					$newPf = " ORDER BY " . $this -> escapeColumnName($this -> toUnderScoreCase($col)) . " $sort ";
+					//					$newPf = " ORDER BY " . $this -> escapeColumnName($this -> toUnderScoreCase($col)) . " $sort ";
+					$newPf = " ORDER BY " . $this -> escapeColumnName($col) . " $sort ";
 				} else {
-					$newPf .= ", " . $this -> escapeColumnName($this -> toUnderScoreCase($col)) . " $sort ";
+					//					$newPf .= ", " . $this -> escapeColumnName($this -> toUnderScoreCase($col)) . " $sort ";
+					$newPf .= ", " . $this -> escapeColumnName($col) . " $sort ";
 				}
 			}
 			$sql .= " " . $newPf . $LIMIT;
@@ -512,9 +514,9 @@ class Mysql {
 	 * @return number 成功返回true或者id,失败返回false
 	 */
 	function insert($tableName, $data, $needReturnId = FALSE) {
-		if ($this -> underScore === TRUE) {
-			$tableName = $this -> toUnderScoreCase($tableName);
-		}
+		//		if ($this -> underScore === TRUE) {
+		//			$tableName = $this -> toUnderScoreCase($tableName);
+		//		}
 		$sql = "INSERT INTO " . $this -> escapeColumnName($tableName);
 		if (is_object($data)) {
 			$data = json_decode(json_encode($data), TRUE);
@@ -527,9 +529,9 @@ class Mysql {
 				$table_columns = $this -> get_columns($tableName);
 			}
 			foreach ($data as $key => $value) {
-				if ($this -> underScore === TRUE) {
-					$key = $this -> toUnderScoreCase($key);
-				}
+				//				if ($this -> underScore === TRUE) {
+				//					$key = $this -> toUnderScoreCase($key);
+				//				}
 				if ($this -> validateColumnName === true && array_key_exists($key, $table_columns) === false) {
 					// 忽略
 					// echo "忽略 $tableName -> $key, \n";
@@ -569,9 +571,9 @@ class Mysql {
 	 * @return number 失败时返回-1;成功时返回修改的记录数,当数据库中有一模一样的记录时,返回0
 	 */
 	function update($tableName, $data, $where) {
-		if ($this -> underScore === TRUE) {
-			$tableName = $this -> toUnderScoreCase($tableName);
-		}
+		//		if ($this -> underScore === TRUE) {
+		//			$tableName = $this -> toUnderScoreCase($tableName);
+		//		}
 		$sql = "UPDATE " . $this -> escapeColumnName($tableName);
 		if (is_object($data)) {
 			$data = json_decode(json_encode($data), TRUE);
@@ -583,9 +585,9 @@ class Mysql {
 			}
 			$pair = array();
 			foreach ($data as $key => $value) {
-				if ($this -> underScore === TRUE) {
-					$key = $this -> toUnderScoreCase($key);
-				}
+				//				if ($this -> underScore === TRUE) {
+				//					$key = $this -> toUnderScoreCase($key);
+				//				}
 				if ($this -> validateColumnName === true && array_key_exists($key, $table_columns) === false) {
 					// 忽略
 					continue;
@@ -625,9 +627,9 @@ class Mysql {
 	 * @return number 返回被删除的行数,失败返回-1
 	 */
 	function delete($tableName, $where) {
-		if ($this -> underScore === TRUE) {
-			$tableName = $this -> toUnderScoreCase($tableName);
-		}
+		//		if ($this -> underScore === TRUE) {
+		//			$tableName = $this -> toUnderScoreCase($tableName);
+		//		}
 		$sql = "DELETE FROM " . $this -> escapeColumnName($tableName);
 		$w = $this -> where($where);
 		if ($w) {
@@ -708,10 +710,10 @@ class Mysql {
 				}
 				//
 				if (is_array($value) && array_values($value) === $value) {
-					if ($this -> underScore === TRUE) {
-						// 变成下划线格式
-						$key = $this -> toUnderScoreCase($key);
-					}
+					//					if ($this -> underScore === TRUE) {
+					//						// 变成下划线格式
+					//						$key = $this -> toUnderScoreCase($key);
+					//					}
 					if (is_int($value[0]) || is_float($value[0])) {
 						if ($operator == "NOT IN" || $operator == "<>") {
 							$pair[] = $this -> escapeColumnName($key) . " NOT IN (" . implode(" , ", $value) . ")";
@@ -733,10 +735,10 @@ class Mysql {
 					$pair[] = "(" . $this -> where($value, strtoupper($key)) . ")";
 					continue;
 				} else {
-					if ($this -> underScore === TRUE) {
-						// 变成下划线格式
-						$key = $this -> toUnderScoreCase($key);
-					}
+					//					if ($this -> underScore === TRUE) {
+					//						// 变成下划线格式
+					//						$key = $this -> toUnderScoreCase($key);
+					//					}
 					// 把boolean的当作数字看待
 					if ($value === TRUE) {
 						$value = 1;
