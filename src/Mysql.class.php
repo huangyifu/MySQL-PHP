@@ -831,6 +831,6 @@ class Mysql {
 		return str_replace("_", "", $ret);
 	}
 
-} 
+}
 
 // echo substring ( "sdfasdf1*<", - 1 );
